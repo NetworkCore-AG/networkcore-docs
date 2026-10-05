@@ -35,7 +35,7 @@ X-Request-ID: e2c5f1a7-a2b6-4f91-f3c4-8f3b6c919a0b
 | `location_id` | string | yes | Location from the [locations catalogue](/ev-charging/distribution-partners/locations) |
 | `charge_point_id` | string | yes | Charge point within the location |
 | `connector_id` | string | yes | Connector on the charge point |
-| `driver_ref` | string | no | Opaque driver identifier for your records |
+| `driver_ref` | string | yes | Your stable identifier for the driver. The hub uses it to create or reuse the driver's charging token at the CPO, so send the same value for the same driver every time |
 
 **Response** — `HTTP 201`:
 
@@ -145,7 +145,7 @@ X-Request-ID: f2c5a1b7-b3c6-4091-a4d5-9a4c7d020b1c
 
 No request body required. The hub sends a stop command to the CPO.
 
-**Response** — `HTTP 200`:
+**Response** — `HTTP 202` (accepted: the stop is on its way to the charger):
 
 ```json
 {
@@ -203,7 +203,6 @@ stateDiagram-v2
 | `404` | `CONNECTOR_NOT_FOUND` | The `connector_id` is not on this charge point |
 | `404` | `SESSION_NOT_FOUND` | No session with this ID exists |
 | `409` | `CHARGE_POINT_OCCUPIED` | Another session is already active on this charge point |
-| `409` | `CHARGE_POINT_OUT_OF_SERVICE` | The charge point is faulted or offline |
 | `422` | `MISSING_FIELD` | A required field is missing from the request body |
 | `409` | `SESSION_NOT_ACTIVE` | Cannot stop a session that is not `ACTIVE` |
 
