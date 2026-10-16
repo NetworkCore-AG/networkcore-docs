@@ -720,6 +720,15 @@ components:
           type: string
         name:
           type: string
+        charging_partner:
+          type: object
+          properties:
+            id:
+              type: string
+              nullable: true
+            name:
+              type: string
+              nullable: true
         address:
           type: string
         city:
