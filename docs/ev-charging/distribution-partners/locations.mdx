@@ -38,7 +38,7 @@ X-Request-ID: bf92c8d4-7f83-4c5e-c091-5c0e3f6e7e84
       "postal_code":   "06600",
       "country":       "MX",
       "coordinates":   { "latitude": 19.4326, "longitude": -99.1900 },
-      "operator_name": "Example CPO",
+      "charging_partner": { "id": "MX*EXA", "name": "Example CPO" },
       "open_hours":    null,
       "last_updated":  "2026-04-29T12:00:00Z",
       "charge_points": [
@@ -84,7 +84,7 @@ Returns the same location object, unwrapped:
     "postal_code":   "06600",
     "country":       "MX",
     "coordinates":   { "latitude": 19.4326, "longitude": -99.1900 },
-    "operator_name": "Example CPO",
+    "charging_partner": { "id": "MX*EXA", "name": "Example CPO" },
     "open_hours":    null,
     "last_updated":  "2026-04-29T12:00:00Z",
     "charge_points": [
@@ -126,7 +126,7 @@ call picks up from where you left off.
 | `postal_code` | string | Postal / ZIP code |
 | `country` | string | ISO 3166-1 alpha-2 country code |
 | `coordinates` | object | `{ latitude, longitude }` (decimal degrees) |
-| `operator_name` | string | Name of the CPO operating this location |
+| `charging_partner` | object | The CPO operating this location: `{ id, name }`. `id` is its OCPI `country_code*party_id` (e.g. `MX*EXA`), `null` if unknown |
 | `open_hours` | string &#124; null | Opening hours description; `null` means 24/7 |
 | `last_updated` | ISO 8601 | When the location was last modified |
 | `charge_points` | array | List of charge points at this location |
