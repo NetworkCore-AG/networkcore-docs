@@ -24,15 +24,17 @@ OCPI price:
 |---|---|
 | Public price | The CPO's price, VAT included |
 | Discount | The CPO's price, VAT included, minus your discount, on every component |
-| Wholesale | One `ENERGY` price per kWh (your wholesale price plus commission) in your agreement's currency, with no time windows, flat fee or other components |
+| Fixed price | One `ENERGY` price per kWh, your fixed price, VAT included, in the CPO's currency |
+| Wholesale | One `ENERGY` price per kWh (the CPO's wholesale price plus commission) in its currency, with no time windows, flat fee or other components |
 
 It is the same price `POST /quotes` uses, under the CPO's same tariff ID, so you
 can match it with the `tariff_id` of each connector in
 [Locations](/ev-charging/distribution-partners/locations).
 Prices carry up to 4 decimals per unit.
 
-If the pricing terms with a CPO can't be resolved, that CPO's tariffs are left
-out of the list and `GET /tariffs/{id}` answers `422 NO_AGREEMENT`.
+You only see the tariffs of CPOs you can buy from (see
+[Which CPOs you see](/ev-charging/distribution-partners/locations#which-cpos-you-see));
+for any other CPO, `GET /tariffs/{id}` answers `404 TARIFF_NOT_FOUND`.
 
 ## List tariffs
 
@@ -204,6 +206,5 @@ price you will pay for that session.
 
 | HTTP | Error code | Meaning |
 |---|---|---|
-| `404` | `TARIFF_NOT_FOUND` | No tariff with this ID exists |
+| `404` | `TARIFF_NOT_FOUND` | No tariff with this ID exists, or its CPO is not one you can buy from |
 | `409` | `AMBIGUOUS_TARIFF` | The ID is published by more than one CPO |
-| `422` | `NO_AGREEMENT` | The pricing terms for this tariff's CPO could not be resolved |
