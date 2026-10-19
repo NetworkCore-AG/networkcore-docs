@@ -80,7 +80,15 @@ X-Request-ID: a3d8f2c1-5b74-4e90-b6d1-9c0e2f7a8b34
           "restrictions": {
             "start_time":   "08:00",
             "end_time":     "22:00",
-            "day_of_week":  ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+            "day_of_week":  ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+            "start_date":   null,
+            "end_date":     null,
+            "min_kwh":      null,
+            "max_kwh":      null,
+            "min_power":    null,
+            "max_power":    null,
+            "min_duration": null,
+            "max_duration": null
           }
         }
       ],
@@ -154,7 +162,7 @@ X-Request-ID: b4e9a3d2-6c85-4f01-c7e2-0d1f3a8b9c45
 | Field | Type | Description |
 |---|---|---|
 | `components` | array | Price components that make up this element |
-| `restrictions` | object &#124; null | Time/day restrictions for when this element applies; `null` means always applies |
+| `restrictions` | object &#124; null | When this element applies (see below); `null` means always applies |
 
 ## PriceComponent types
 
@@ -175,14 +183,48 @@ Each component has three fields:
 
 ## Restrictions schema
 
-Restrictions narrow when a tariff element applies. If all restriction fields
-are `null`, the element applies at all times.
+Restrictions narrow when a tariff element applies. They are the CPO's own OCPI
+restrictions, with the same names and units. Fields that are set must all hold;
+a `null` field doesn't restrict. Times and dates are in the charge point's time zone.
 
 | Field | Type | Description |
 |---|---|---|
 | `start_time` | string &#124; null | Start of the time window (`HH:MM`, 24-hour format) |
-| `end_time` | string &#124; null | End of the time window (`HH:MM`, 24-hour format) |
+| `end_time` | string &#124; null | End of the time window (`HH:MM`); earlier than `start_time` means it runs past midnight |
 | `day_of_week` | string[] &#124; null | Days when this element applies (e.g. `["MONDAY", "FRIDAY"]`) |
+| `start_date` | string &#124; null | First day it applies (`YYYY-MM-DD`) |
+| `end_date` | string &#124; null | Day it stops applying (`YYYY-MM-DD`, not included) |
+| `min_kwh` | number &#124; null | Applies once this many kWh have been charged in the session |
+| `max_kwh` | number &#124; null | Applies until this many kWh have been charged |
+| `min_power` | number &#124; null | Applies while charging at this power (kW) or more |
+| `max_power` | number &#124; null | Applies while charging below this power (kW) |
+| `min_duration` | integer &#124; null | Applies once the session has lasted this many seconds |
+| `max_duration` | integer &#124; null | Applies until the session has lasted this many seconds |
+
+### Idle fees
+
+An idle fee is a `PARKING_TIME` component, charged per hour while the car stays
+plugged in without charging, usually limited by duration. For example, parking
+free for the first 30 minutes of the session and 50 MXN/h after that:
+
+```json
+"elements": [
+  {
+    "components": [{ "type": "PARKING_TIME", "price": 0, "unit": "hour" }],
+    "restrictions": { "max_duration": 1800, "min_duration": null }
+  },
+  {
+    "components": [{ "type": "PARKING_TIME", "price": 50, "unit": "hour" }],
+    "restrictions": { "min_duration": 1800, "max_duration": null }
+  }
+]
+```
+
+Durations count from the start of the session, not from when charging stopped.
+(Other restriction fields omitted here; they are `null`.) Parking is not included
+in `POST /quotes`, since how long a car stays can't be estimated; on a
+public-price agreement the session's final `total_cost` includes it. On a
+wholesale or fixed-price agreement you only see one price per kWh.
 
 ## Tariff locking
 
