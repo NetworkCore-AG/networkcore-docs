@@ -10,6 +10,15 @@ On first integration, do a full pull so your in-app map shows every charging
 station. After that, use `updated_since` on subsequent calls to fetch only
 changed locations.
 
+## Which CPOs you see
+
+You work one pricing mode with NetworkCore, public price or wholesale, and you
+only see the CPOs you can buy from: the ones that offer your mode, or the ones
+you have a direct agreement with. A CPO you can't buy from does not exist for
+you: its locations, charge points and tariffs are not in `/locations`,
+`/availability` or `/tariffs`, a request about it by ID (location, tariff,
+quote or session start) answers `404`, and you get no webhooks about it.
+
 ## List locations
 
 ```http
