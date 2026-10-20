@@ -170,7 +170,8 @@ No request body required. The hub sends a stop command to the CPO.
 :::info Async deactivation
 The stop command is asynchronous. The session remains `ACTIVE` until the CPO
 confirms the charger has stopped. Once confirmed, the session transitions to
-`COMPLETED` with `end_time`, final `kwh`, and `total_cost` populated. Track
+`COMPLETED` with `end_time` and final `kwh`. `total_cost` becomes final when the
+CPO's charge detail record arrives (see [Session cost](#session-cost)). Track
 this via the [`session.updated` webhook](/webhooks/events) or by polling.
 :::
 
@@ -191,8 +192,22 @@ stateDiagram-v2
 |---|---|
 | `PENDING` | Start command sent to CPO, awaiting confirmation |
 | `ACTIVE` | Charger is energized, kWh accruing |
-| `COMPLETED` | Session finished — `end_time`, `kwh`, and `total_cost` are final |
+| `COMPLETED` | Session finished — `end_time` and `kwh` are final; see [Session cost](#session-cost) for `total_cost` |
 | `FAILED` | Session could not start or was interrupted by a charger fault |
+
+## Session cost
+
+`total_cost` is what you owe for the session, VAT included, per your agreement.
+`total_cost_status` tells you how far it is settled. Every change is sent as
+`session.updated`.
+
+| `total_cost_status` | When | `total_cost` |
+|---|---|---|
+| `ESTIMATED` | While charging and until the CPO's charge detail record (CDR) arrives | The cost so far |
+| `FINAL` | The CDR arrived and passed validation | The final cost |
+| `IN_REVIEW` | The CDR is held for review | `null` |
+| `NO_CDR` | No CDR 14 days after the session ended: it is closed for good on its last estimate | That estimate, `null` if there was none |
+| `null` | No cost yet, e.g. `PENDING` | `null` |
 
 ## Error responses
 
@@ -231,8 +246,9 @@ Error responses follow the standard envelope:
 | `end_time` | ISO 8601 &#124; null | When the charger stopped |
 | `kwh` | number | Energy delivered so far (updated periodically during `ACTIVE`) |
 | `currency` | ISO 4217 | Currency for `total_cost` |
-| `total_cost` | number &#124; null | Final cost, set when status is `COMPLETED` |
-| `cost_breakdown` | array &#124; null | On the final cost, what it is made of: one `{ "type", "amount" }` per `ENERGY`, `TIME`, `FLAT` and `PARKING_TIME` (time plugged in without charging, idle fees included), VAT included, summing to `total_cost`. `null` while the cost is an estimate or in review, and occasionally on a final cost we could not itemize |
+| `total_cost` | number &#124; null | What you owe, VAT included; see [Session cost](#session-cost) |
+| `total_cost_status` | string &#124; null | `ESTIMATED` &#124; `FINAL` &#124; `IN_REVIEW` &#124; `NO_CDR`, or `null` with no cost yet |
+| `cost_breakdown` | array &#124; null | On the final cost, what it is made of: one `{ "type", "amount" }` per `ENERGY`, `TIME`, `FLAT` and `PARKING_TIME` (time plugged in without charging, idle fees included), VAT included, summing to `total_cost`. `null` while the cost is an estimate, in review or `NO_CDR`, and occasionally on a final cost we could not itemize |
 | `created_at` | ISO 8601 | When the session was created |
 | `updated_at` | ISO 8601 | Last update timestamp |
 
