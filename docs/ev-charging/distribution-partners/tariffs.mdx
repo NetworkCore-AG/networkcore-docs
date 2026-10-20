@@ -24,8 +24,8 @@ OCPI price:
 |---|---|
 | Public price | The CPO's price, VAT included |
 | Discount | The CPO's price, VAT included, minus your discount, on every component |
-| Fixed price | One `ENERGY` price per kWh, your fixed price, VAT included, in the CPO's currency |
-| Wholesale | One `ENERGY` price per kWh (the CPO's wholesale price plus commission) in its currency, with no time windows, flat fee or other components |
+| Fixed price | One `ENERGY` price per kWh, your fixed price, VAT included, in the CPO's currency, plus the CPO's parking elements |
+| Wholesale | One `ENERGY` price per kWh (the CPO's wholesale price plus commission) in its currency, plus the CPO's parking elements with the commission; no time windows, flat fee or other components |
 
 It is the same price `POST /quotes` uses, under the CPO's same tariff ID, so you
 can match it with the `tariff_id` of each connector in
@@ -222,9 +222,11 @@ free for the first 30 minutes of the session and 50 MXN/h after that:
 
 Durations count from the start of the session, not from when charging stopped.
 (Other restriction fields omitted here; they are `null`.) Parking is not included
-in `POST /quotes`, since how long a car stays can't be estimated; on a
-public-price agreement the session's final `total_cost` includes it. On a
-wholesale or fixed-price agreement you only see one price per kWh.
+in `POST /quotes`, since how long a car stays can't be estimated, but the
+session's final `total_cost` includes it on every agreement, shown apart in its
+`cost_breakdown`. On a wholesale or fixed-price agreement you pay one price per
+kWh plus the CPO's parking. Your discount or commission applies to parking like
+to the rest.
 
 ## Tariff locking
 
