@@ -232,6 +232,7 @@ Error responses follow the standard envelope:
 | `kwh` | number | Energy delivered so far (updated periodically during `ACTIVE`) |
 | `currency` | ISO 4217 | Currency for `total_cost` |
 | `total_cost` | number &#124; null | Final cost, set when status is `COMPLETED` |
+| `cost_breakdown` | array &#124; null | On the final cost, what it is made of: one `{ "type", "amount" }` per `ENERGY`, `TIME`, `FLAT` and `PARKING_TIME` (time plugged in without charging, idle fees included), VAT included, summing to `total_cost`. `null` while the cost is an estimate or in review, and occasionally on a final cost we could not itemize |
 | `created_at` | ISO 8601 | When the session was created |
 | `updated_at` | ISO 8601 | Last update timestamp |
 
