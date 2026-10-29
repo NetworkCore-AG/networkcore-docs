@@ -36,6 +36,7 @@ X-Request-ID: e2c5f1a7-a2b6-4f91-f3c4-8f3b6c919a0b
 | `charge_point_id` | string | yes | Charge point within the location |
 | `connector_id` | string | yes | Connector on the charge point |
 | `driver_ref` | string | yes | Your stable identifier for the driver. The hub uses it to create or reuse the driver's charging token at the CPO, so send the same value for the same driver every time |
+| `affiliate_code` | string | no | Only for Vira Direct: the `a` of the payment link the driver paid through, sent as it came. Leave it out for your own direct customers. A code that matches no partner never blocks the start, NetworkCore reviews it |
 
 **Response** — `HTTP 201`:
 
@@ -219,6 +220,8 @@ stateDiagram-v2
 | `404` | `SESSION_NOT_FOUND` | No session with this ID exists |
 | `409` | `CHARGE_POINT_OCCUPIED` | Another session is already active on this charge point |
 | `422` | `MISSING_FIELD` | A required field is missing from the request body |
+| `422` | `INVALID_PARAMETER` | `affiliate_code` is not a string |
+| `422` | `DUPLICATE_REFERENCE` | The `reference` was already used for a different request (including a different `affiliate_code`) |
 | `409` | `SESSION_NOT_ACTIVE` | Cannot stop a session that is not `ACTIVE` |
 
 Error responses follow the standard envelope:
